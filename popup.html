@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+	<div id="wrap">
+		<p style="margin-bottom: 15px;">
+			<strong>Google Calendar Events to Kintone</strong><br>
+			業務日報の編集画面で実行するとGoogleカレンダーの予定を転記する拡張機能です。
+		</p>
+
+		<ul class="m-list-form">
+			<li>
+				<label>State</label>
+				<select name="state" id="state">
+					<option value="出社時">出社時</option>
+					<option value="退社時">退社時</option>
+				</select>
+			</li>
+			<li>
+				<label>Target Calendar</label>
+				<select name="ids" id="ids" class="js-storage"></select>
+			</li>
+			<li>
+				<label>Target Date</label>
+				<input type="date" name="date" id="date">
+			</li>
+			<li>
+				<button id="convert"><span class="icon-search">Schedule to Kintone</span></button>
+			</li>
+		</ul>
+	</div>
+
+	<script src="js/jquery-2.1.1.min.js"></script>
+	<script src="oauth2/oauth2.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
