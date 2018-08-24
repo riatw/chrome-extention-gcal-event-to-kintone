@@ -9,24 +9,37 @@
 	<div id="wrap">
 		<p style="margin-bottom: 15px;">
 			<strong>Google Calendar Events to Kintone</strong><br>
-			業務日報の編集画面で実行するとGoogleカレンダーの予定を転記する拡張機能です。
+			業務日報の編集画面で実行するとGoogleカレンダーの予定を転記する拡張機能です。<br>
+			※ベータ版の機能は開発中のものなので使用は自己責任でお願いします。
 		</p>
 
 		<ul class="m-list-form">
 			<li>
-				<label>State</label>
+				<label>出社時/退社時</label>
 				<select name="state" id="state">
 					<option value="出社時">出社時</option>
 					<option value="退社時">退社時</option>
 				</select>
 			</li>
 			<li>
-				<label>Target Calendar</label>
+				<label>対象のカレンダー</label>
 				<select name="ids" id="ids" class="js-storage"></select>
 			</li>
 			<li>
-				<label>Target Date</label>
+				<label>対象の日付</label>
 				<input type="date" name="date" id="date">
+			</li>
+			<li>
+				<label>退社時に自動で実績登録済みにする（ベータ版）</label>
+				<input type="checkbox" name="setfixed" id="setfixed" value="1" class="js-storage">
+			</li>
+			<li>
+				<label>明日の予定を自動入力する（ベータ版）</label>
+				<input type="checkbox" name="settommorow" id="settommorow" value="1" class="js-storage">
+			</li>
+			<li>
+				<label>明日の日付（ベータ版）</label>
+				<input type="date" name="tommorowdate" id="tommorowdate">
 			</li>
 			<li>
 				<button id="convert"><span class="icon-search">Schedule to Kintone</span></button>

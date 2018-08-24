@@ -32,7 +32,7 @@ li {
 	display: block;
 	margin-bottom: 5px;
 }
-.m-list-form li input,
+.m-list-form li input[type=text],
 .m-list-form li textarea {
 	width: 100%;
 }

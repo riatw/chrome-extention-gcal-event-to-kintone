@@ -28,8 +28,14 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
 	if ( request.method == "setData" ) {
 		var stash = request.stash;
+		var stash2 = request.stash2;
 		var state = request.state;
 		var date = request.date;
+		var setfixed = request.setfixed;
+		var settommorow = request.settommorow;
+
+		var schedule1 = stash;
+		var arr = schedule1;
 
 		var tableNum = 0;
 
@@ -50,6 +56,32 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 			$(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find("tbody tr").not(":last").find(".remove-row-image-gaia").click();
 			$(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find("input[type='text'], textarea").val("");
 
+			var todolist = [];
+
+			for ( var i = 0; i < arr.length; i++ ) {
+				if ( arr[i]["summary"].indexOf("朝礼") == -1 && arr[i]["summary"].indexOf("日報") == -1 && arr[i]["summary"].indexOf("制作MTG") == -1 ) {
+					todolist.push( arr[i]["summary"] );
+				}
+			}
+
+			todolist = todolist.filter(function(value, index, self) {
+				return self.indexOf(value) === index;
+			});
+
+			for ( var i = 0; i < todolist.length; i++ ) {
+				var $target = $(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find("tbody tr").eq(i);
+
+				$target.find("td:eq(1) .input-text-cybozu").val( todolist[i] );
+
+				if ( i < todolist.length - 1 ) {
+					$(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find(".add-row-image-gaia").last().trigger("click");
+				}
+				else {
+					$(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find(".add-row-image-gaia").last().trigger("click");
+					$(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find(".remove-row-image-gaia").last().trigger("click");
+				}
+			}
+
 			var $selector = $(":contains('本日の優先順位(上から一番)')").parents(".row-gaia").next().find(".add-row-image-gaia");
 
 			$(document).on('click', $selector, function () {
@@ -61,7 +93,8 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 			if ( $(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr").length > 1 ) {
 
 				var currentDate = new Date( $(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find("input[type='text']").val() );
-				var currentStaus = $(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find("select").val();
+				var currentStaus = $(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find(".gaia-argoui-select-label").text();
+				var currentStaus2 = $(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find(".gaia-argoui-select-label").attr("aria-posinset");
 
 				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last .add-row-image-gaia").click();
 
@@ -76,17 +109,37 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
 				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find("input[type='text']").eq(0).val( formatDate( currentDate, "YYYY-MM-DD") );
 
-				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find("select").val( currentStaus );
+				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find(".gaia-argoui-select-label").text( currentStaus );
+				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody tr:last").find(".gaia-argoui-select-label").attr("aria-posinset", currentStaus2 );
+
+				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody").find(".add-row-image-gaia").last().trigger("click");
+				$(":contains('直近の予定')").parents(".row-gaia").next().find("tbody").find(".remove-row-image-gaia").last().trigger("click");
 			}
 		}
 		else {
 			tableNum = 2;
+
+			if ( setfixed ) {
+				// 自動で実績登録する
+				$(".gaia-app-statusbar-action").click();
+				$(".gaia-app-statusbar-assigneepopup-ok").click();
+			}
 		}
 
-		var schedule1 = stash;
+		if ( settommorow ) {
+			var todolist = [];
+			var arr2 = stash2;
+
+			for ( var i = 0; i < arr2.length; i++ ) {
+				if ( arr2[i]["summary"].indexOf("朝礼") == -1 && arr2[i]["summary"].indexOf("日報") == -1 && arr2[i]["summary"].indexOf("制作MTG") == -1 ) {
+					todolist.push( "・" + arr2[i]["summary"].replace(/\n/gm, "") );
+				}
+			}
+
+			$(":contains('明日のタスク')").parents(".row-gaia").find("textarea").val( todolist.join("\n") );
+		}
 
 		$(".subtable-gaia").eq(tableNum).each(function() {
-			var arr = schedule1;
 			var $this = $(this);
 
 			$this.find("tbody tr").not(":last").find(".remove-row-image-gaia").click();
@@ -95,12 +148,6 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 			for ( var i = 0; i < arr.length; i++ ) {
 				var $target = $this.find("tbody tr").eq(i);
 				var current = [];
-
-				console.log(arr);
-				console.log(arr[i]);
-				console.log( arr[i]["starttime"] );
-				console.log( arr[i]["endtime"] );
-				console.log( arr[i]["summary"] );
 
 				current.push( arr[i]["starttime"] );
 				current.push( arr[i]["endtime"] );

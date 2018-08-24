@@ -2,7 +2,7 @@
    "manifest_version": 2,
    "name": "Google Calendar Events to Kintone",
    "description": "Googleカレンダーの1日分のスケジュールをKintoneの業務日報に登録（入力補助）する拡張機能です。",
-   "version": "1.0.2",
+   "version": "1.0.6",
    "minimum_chrome_version": "29",
    "icons": {
       "16": "images/icon/icon_16.png",
@@ -30,6 +30,7 @@
          "matches": ["https://*.cybozu.com/*"],
          "js": [
             "js/jquery-2.1.1.min.js",
+            "js/jquery-ui.js",
             "js/content.js"
          ]
       },

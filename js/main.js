@@ -39,14 +39,30 @@ $(document).ready(function(){
 		var name = $(this).attr("name");
 
 		if ( localStorage.getItem(name) ) {
-			$(this).val( localStorage.getItem(name) );
+			if ( $(this).is(":checkbox") ) {
+				if ( localStorage.getItem(name) == "true" ) {
+					temp = true;
+				}
+				else {
+					temp = false;
+				}
+				$(this).prop("checked", temp );
+			}
+			else {
+				$(this).val( localStorage.getItem(name) );
+			}
 		}
 	});
 
 	$(".js-storage").blur(function() {
 		var name = $(this).attr("name");
 
-		localStorage.setItem(name, $(this).val());
+		if ( $(this).is(":checkbox") ) {
+			localStorage.setItem(name, $(this).prop("checked"));
+		}
+		else {
+			localStorage.setItem(name, $(this).val());
+		}
 	});
 
 	//カレンダーリストの取得
@@ -91,9 +107,21 @@ $(document).ready(function(){
 	// 日付の初期値を設定
 	$("#date").val(formatDate( new Date, "YYYY-MM-DD"));
 
+	var currentDate = new Date();
+	currentDate.setDate( currentDate.getDate() + 1 );
+	if ( currentDate.getDay() == 0 ) {
+		currentDate.setDate( currentDate.getDate() + 1 );
+	}
+	else if ( currentDate.getDay() == 6 ) {
+		currentDate.setDate( currentDate.getDate() + 2 );
+	}
+
+	$("#tommorowdate").val(formatDate( currentDate, "YYYY-MM-DD"));
+
 	// イベントを取得→テキストに変換
 	$("#convert").click(function() {
 		var date = $("#date").val();
+		var tommorowdate = $("#tommorowdate").val();
 		var state = $("#state").val();
 		var calendarId = $("#ids").val();
 
@@ -127,10 +155,38 @@ $(document).ready(function(){
 						});
 					}
 
-						console.log( stash );
+					var timeMin2 = encodeURIComponent(formatDate( new Date(tommorowdate), "YYYY-MM-DDT00:00:00.000+09:00"));
+					var timeMax2 = encodeURIComponent(formatDate( new Date(tommorowdate), "YYYY-MM-DDT23:59:59.000+09:00"));
 
-					chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-						chrome.tabs.sendMessage(tabs[0].id, { method: "setData", state: $("#state").val(), date: $("#date").val(), stash: stash }, function(response) {});
+					$.ajax({
+						type: "GET",
+						url: "https://www.googleapis.com/calendar/v3/calendars/" + calendarId + "/events?singleEvents=true&orderBy=startTime&timeMin=" + timeMin2 + "&timeMax=" + timeMax2 + "&timeZone=Asia/Tokyo",
+						dataType: "json",
+						headers: {
+							'Authorization': 'Bearer ' + google.getAccessToken()
+						},
+						success: function(data) {
+							var items = data.items;
+							var stash2 = [];
+
+							for ( var i=0; i < items.length; i++ ) {
+								var item = items[i];
+
+								if ( new Date(item.start.dateTime).toString() === "Invalid Date" ) {
+									continue;
+								}
+
+								stash2.push({
+									starttime: formatDate( new Date(item.start.dateTime), 'hh:mm'),
+									endtime: formatDate( new Date(item.end.dateTime), 'hh:mm'),
+									summary: item.summary + "\n"
+								});
+							}
+
+							chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+								chrome.tabs.sendMessage(tabs[0].id, { method: "setData", state: $("#state").val(), date: $("#date").val(), tommorowdate: $("#tommorowdate").val(), stash: stash, stash2: stash2, setfixed: $("#setfixed").prop("checked"), settommorow: $("#settommorow").prop("checked") }, function(response) {});
+							});
+						}
 					});
 				}
 			});
