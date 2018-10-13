@@ -136,6 +136,10 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 				}
 			}
 
+			todolist = todolist.filter(function(value, index, self) {
+				return self.indexOf(value) === index;
+			});
+
 			$(":contains('明日のタスク')").parents(".row-gaia").find("textarea").val( todolist.join("\n") );
 		}
 
